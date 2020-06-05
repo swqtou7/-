@@ -1,0 +1,41 @@
+pro stats_doit
+  compile_opt IDL2
+  compile_opt DEFINT32
+  envi, /restore_base_save_files
+  envi_batch_init, log_file='batch.txt'
+  t1=systime(1)
+  work_dir=dialog_pickfile(title='选择文件所在路径',/directory)
+  cd, work_dir
+  in_dir="D:\531\test3\"
+for i_day=1, 9 do begin
+    ;for h=1,9 do begin
+     ;for l=1,6 do begin
+    ;ft='MCD19A2A2004'+string(i_day, format='(i3.3)')+'h28v050062018037024821r'+string(h, format='(i1.1)')+'c'+string(l, format='(i1.1)')  
+     ft='shanghaiDelteNAN'+string(i_day, format='(i1.1)')  
+    fns=file_search(ft+'*.tif',count=fnums)
+        envi_open_file, fns, r_fid=fid
+        envi_file_query, fid, ns=ns, nl=nl, nb=nb, dims=dims
+        pos=[0]
+        data = envi_get_data(fid=fid,dims=dims,pos=pos)
+        MAP_INFO = ENVI_GET_MAP_INFO(fid=fid)
+  if (mean(data)) Eq 0 then begin
+        data4=999
+  endif else begin
+        data2 = data[where(data GT 0)]
+        data1=mean(data)*0.001
+        data3=mean(data)/mean(data2)
+        print,data1;
+        print,mean(data2);
+        print,data3;
+        print,(data1*alog(data1+1))/((0-data3)*(alog(data3)-1));
+       data4=(data1*alog(data1+1))/((0-data3)*(alog(data3)-1));
+        array=lonarr(98,93)
+  endelse
+        data5=array+data4
+        out_name=in_dir+fns+"test.dat"
+        ENVI_Write_ENVI_File,data5,out_name=out_name,map_info=map_info,r_fid=fid,ns=ns, nl=nl, nb=nb, dims=dims
+endfor
+     ; endfor  
+       ; endfor
+        envi_batch_exit
+        end
